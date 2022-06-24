@@ -1,0 +1,41 @@
+version: "3.7"
+
+networks:
+  sausage-store:
+    driver: bridge
+    ipam:
+      driver: default
+
+services:
+  backend:
+    image: gitlab.praktikum-services.ru:5050/00_babentsov_n/sausage-autobuild/backend:latest
+    restart: always
+    healthcheck:
+      test: curl --fail -s http://localhost:8080/actuator/health
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 6
+    expose:
+      - "8080"
+    env_file:
+      - 'env.list'
+    networks:
+      sausage-store:
+    container_name: sausage-back
+
+  backend-report:
+    image: gitlab.praktikum-services.ru:5050/00_babentsov_n/sausage-autobuild/backend-report:latest
+    networks:
+      sausage-store:
+    env_file:
+      - 'env.list'
+    container_name: sausage-back-report
+
+  frontend:
+    image: gitlab.praktikum-services.ru:5050/00_babentsov_n/sausage-autobuild/frontend:latest
+    networks:
+      sausage-store:
+    ports:
+      - 80:80
+    container_name: sausage-front
